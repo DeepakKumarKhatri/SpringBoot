@@ -1,42 +1,56 @@
 package com.deepakLearning.journalApp.controllers;
 
 import com.deepakLearning.journalApp.entities.Journal;
+import com.deepakLearning.journalApp.services.JournalEntryService;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/journal")
 public class JournalEntryController {
-    private Map<Long, Journal> journalEntries = new HashMap<>();
+
+    @Autowired
+    private JournalEntryService journalEntryService;
 
     @GetMapping
     public List<Journal> getJournals() {
-        return new ArrayList<>(journalEntries.values());
+        return journalEntryService.getEntries();
     }
 
     @PostMapping
     public String createEntry(@RequestBody Journal journal) {
-        journalEntries.put(journal.getId(), journal);
+        journal.setDate(new Date());
+        journalEntryService.creatEntry(journal);
         return "Status: 200," +
                 " New Entry Created Successfully";
     }
 
     @GetMapping("{journalId}")
-    public Journal getJournal(@PathVariable Long journalId) {
-        return journalEntries.get(journalId);
+    public Journal getJournal(@PathVariable ObjectId journalId) {
+        return journalEntryService.getEntry(journalId).orElse(
+                null
+        );
     }
 
     @DeleteMapping("{journalId}")
-    public Journal deleteJournal(@PathVariable Long journalId) {
-        return journalEntries.remove(journalId);
+    public String deleteJournal(@PathVariable ObjectId journalId) {
+         journalEntryService.deleteEntry(journalId);
+         return "Entry with ID: " + journalId + " deleted successfully";
     }
 
     @PatchMapping("{journalId}")
-    public Journal updateJournal(@PathVariable Long journalId, @RequestBody  Journal journal) {
-        return journalEntries.put(journalId,journal);
+    public String updateJournal(@PathVariable ObjectId journalId, @RequestBody  Journal journal) {
+        Journal response = journalEntryService.getEntry(journalId).orElse(null);
+        if (response!=null){
+            response.setTitle(journal.getTitle() != null && !journal.getTitle().isEmpty() ? journal.getTitle() : response.getTitle());
+            response.setDescription(journal.getDescription() != null && !journal.getDescription().isEmpty() ? journal.getDescription() : response.getDescription());
+        }
+        journalEntryService.creatEntry(response);
+        return "Status: 200," +
+                "Updated Successfully";
     }
 }
