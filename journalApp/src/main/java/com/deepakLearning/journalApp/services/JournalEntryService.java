@@ -6,6 +6,7 @@ import com.deepakLearning.journalApp.repository.JournalEntryRepo;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -20,12 +21,17 @@ public class JournalEntryService {
     @Autowired
     private UserService userService;
 
+    @Transactional
     public void creatEntry(Journal journal, String userName){
-        User user = userService.findByUserName(userName);
-        journal.setDate(new Date());
-        Journal savedJournal = journalEntryRepo.save(journal);
-        user.getJournalList().add(savedJournal);
-        userService.creatUser(user);
+        try {
+            User user = userService.findByUserName(userName);
+            journal.setDate(new Date());
+            Journal savedJournal = journalEntryRepo.save(journal);
+            user.getJournalList().add(savedJournal);
+            userService.creatUser(user);
+        }catch (Exception e){
+            throw new RuntimeException("An error occurred: ", e);
+        }
     }
 
     public void creatEntry(Journal journal){

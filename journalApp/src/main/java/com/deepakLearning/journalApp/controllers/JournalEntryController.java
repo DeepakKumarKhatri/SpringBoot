@@ -24,7 +24,9 @@ public class JournalEntryController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<?> getAllJournalEntriesOfUser(@RequestParam(value = "userName") String userName) {
+    public ResponseEntity<?> getAllJournalEntriesOfUser(
+            @RequestParam(value = "userName") String userName)
+    {
         User currentUser = userService.findByUserName(userName);
         if (currentUser!=null) {
             List<Journal> journalList = currentUser.getJournalList();
@@ -36,12 +38,17 @@ public class JournalEntryController {
     }
 
     @PostMapping("{userName}")
-    public ResponseEntity<String> createEntry(@RequestBody Journal journal, @PathVariable String userName) {
+    public ResponseEntity<String> createEntry(
+            @RequestBody Journal journal,
+            @PathVariable String userName)
+    {
         try {
             journalEntryService.creatEntry(journal,userName);
-            return new ResponseEntity<> ("New Entry Created Successfully", HttpStatus.CREATED);
+            return new ResponseEntity<> (
+                    "New Entry Created Successfully", HttpStatus.CREATED);
         }catch (Exception e){
-            return new ResponseEntity<> ("Failed to create new Entry", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<> (
+                    "Failed to create new Entry", HttpStatus.BAD_REQUEST);
         }
     }
 
