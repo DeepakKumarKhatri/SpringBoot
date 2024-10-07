@@ -17,7 +17,7 @@ public class GeneralController {
     @PostMapping
     public ResponseEntity<?> addNewUser(@RequestBody User user){
         try {
-            User newUser = userService.creatUser(user);
+            User newUser = userService.createNewUser(user);
             if (newUser!=null){
                 return new ResponseEntity<> (newUser, HttpStatus.CREATED);
             }

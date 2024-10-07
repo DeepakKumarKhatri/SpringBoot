@@ -20,9 +20,13 @@ public class UserService {
     @Autowired
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public User creatUser(User user){
+    public User createNewUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of("USER"));
+        return userRepo.save(user);
+    }
+
+    public User createUser(User user){
         return userRepo.save(user);
     }
 

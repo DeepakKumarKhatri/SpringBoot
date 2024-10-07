@@ -40,7 +40,7 @@ public class UserController {
             if (oldUser!=null){
                 oldUser.setFullName(user.getFullName());
                 oldUser.setPassword(user.getPassword());
-                userService.creatUser(oldUser);
+                userService.createNewUser(oldUser);
                 return new ResponseEntity<>("USER UPDATED",HttpStatus.NO_CONTENT);
             }else {
                 return new ResponseEntity<>("User Not Found",HttpStatus.BAD_REQUEST);

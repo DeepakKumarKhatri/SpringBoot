@@ -22,19 +22,19 @@ public class JournalEntryService {
     private UserService userService;
 
     @Transactional
-    public void creatEntry(Journal journal, String userName){
+    public void createNewEntry(Journal journal, String userName){
         try {
             User user = userService.findByUserName(userName);
             journal.setDate(new Date());
             Journal savedJournal = journalEntryRepo.save(journal);
             user.getJournalList().add(savedJournal);
-            userService.creatUser(user);
+            userService.createUser(user);
         }catch (Exception e){
             throw new RuntimeException("An error occurred: ", e);
         }
     }
 
-    public void creatEntry(Journal journal){
+    public void createEntry(Journal journal){
         journalEntryRepo.save(journal);
     }
 
@@ -49,7 +49,7 @@ public class JournalEntryService {
     public void deleteEntry(ObjectId entryId, String userName){
         User user = userService.findByUserName(userName);
         user.getJournalList().removeIf(journal -> journal.getId().equals(entryId));
-        userService.creatUser(user);
+        userService.createNewUser(user);
         journalEntryRepo.deleteById(entryId);
     }
 
