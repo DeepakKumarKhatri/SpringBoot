@@ -5,12 +5,14 @@ import com.deepakLearning.journalApp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 public class UserController {
 
     @Autowired
@@ -29,30 +31,32 @@ public class UserController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> addNewUser(@RequestBody User user){
-        try {
-            User newUser = userService.creatUser(user);
-            if (newUser!=null){
-                return new ResponseEntity<> (newUser, HttpStatus.CREATED);
-            }
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }catch (Exception e){
-            return new ResponseEntity<>(e.toString(),HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @PutMapping
     public ResponseEntity<?> updateUser(@RequestBody User user){
         try {
-            User oldUser = userService.findByUserName(user.getUserName());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
+            User oldUser = userService.findByUserName(userName);
             if (oldUser!=null){
                 oldUser.setFullName(user.getFullName());
                 oldUser.setPassword(user.getPassword());
                 userService.creatUser(oldUser);
                 return new ResponseEntity<>("USER UPDATED",HttpStatus.NO_CONTENT);
+            }else {
+                return new ResponseEntity<>("User Not Found",HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUser(@RequestBody User user){
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
+            userService.deleteUser(userName);
+            return new ResponseEntity<>("USER UPDATED",HttpStatus.NO_CONTENT);
         }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

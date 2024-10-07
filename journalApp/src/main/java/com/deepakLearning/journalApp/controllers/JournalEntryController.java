@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/journal")
+@RequestMapping("/api/journal")
 public class JournalEntryController {
 
     @Autowired
@@ -67,23 +67,48 @@ public class JournalEntryController {
         return new ResponseEntity<> ("Entry with ID: " + journalId + " deleted successfully", HttpStatus.OK);
     }
 
-    @PutMapping("{userName}/{journalId}")
+    @PutMapping("/{userName}/{journalId}")
     public ResponseEntity<?> updateJournal(
-            @PathVariable ObjectId journalId,
-            @RequestBody  Journal journal,
-            @PathVariable String userName)
-    {
+            @PathVariable("userName") String userName,
+            @PathVariable("journalId") String journalId,
+            @RequestBody Journal journal
+    ) {
         try {
-            Journal response = journalEntryService.getEntry(journalId).orElse(null);
-
-            if (response!=null){
-                response.setTitle(journal.getTitle() != null && !journal.getTitle().isEmpty() ? journal.getTitle() : response.getTitle());
-                response.setDescription(journal.getDescription() != null && !journal.getDescription().isEmpty() ? journal.getDescription() : response.getDescription());
+            // Find the user by username
+            User user = userService.findByUserName(userName);
+            System.out.println(user);
+            if (user == null) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
             }
-            journalEntryService.creatEntry(response);
-            return new ResponseEntity<>("Updated Successfully",HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>("Error Occurred while updating",HttpStatus.BAD_REQUEST);
+
+            // Check if the journalId belongs to this user
+            ObjectId journalIdTyped = new ObjectId(journalId);
+
+            Journal journalToUpdate = user.getJournalList().stream()
+                    .filter(j -> j.getId().equals(journalIdTyped))
+                    .findFirst()
+                    .orElse(null);
+
+            if (journalToUpdate == null) {
+                return new ResponseEntity<>("Journal not found for this user", HttpStatus.FORBIDDEN);
+            }
+
+            // Fetch the journal entry
+            Journal existingJournal = journalEntryService.getEntry(journalIdTyped).orElse(null);
+            if (existingJournal == null) {
+                return new ResponseEntity<>("Journal not found", HttpStatus.NOT_FOUND);
+            }
+
+            // Update the journal fields
+            existingJournal.setTitle(!journal.getTitle().isEmpty() ? journal.getTitle() : existingJournal.getTitle());
+            existingJournal.setDescription(journal.getDescription() != null && !journal.getDescription().isEmpty() ? journal.getDescription() : existingJournal.getDescription());
+
+            // Save the updated journal
+            journalEntryService.creatEntry(existingJournal);
+
+            return new ResponseEntity<>("Updated Successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error Occurred while updating", HttpStatus.BAD_REQUEST);
         }
     }
 }

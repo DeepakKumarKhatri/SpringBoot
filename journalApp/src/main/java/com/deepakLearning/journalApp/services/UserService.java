@@ -4,6 +4,8 @@ import com.deepakLearning.journalApp.entities.User;
 import com.deepakLearning.journalApp.repository.UserRepo;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,7 +17,12 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public User creatUser(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(List.of("USER"));
         return userRepo.save(user);
     }
 
@@ -27,8 +34,8 @@ public class UserService {
         return userRepo.findById(userId);
     }
 
-    public void deleteUser(ObjectId userId){
-        userRepo.deleteById(userId);
+    public void deleteUser(String userName){
+        userRepo.deleteByUserName(userName);
     }
 
     public User findByUserName(String userName){
