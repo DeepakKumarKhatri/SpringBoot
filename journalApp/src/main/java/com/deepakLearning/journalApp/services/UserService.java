@@ -30,6 +30,12 @@ public class UserService {
         return userRepo.save(user);
     }
 
+    public User addNewAdmin(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(List.of("ADMIN"));
+        return userRepo.save(user);
+    }
+
     public List<User> getUsers(){
         return userRepo.findAll();
     }

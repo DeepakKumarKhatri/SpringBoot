@@ -44,3 +44,11 @@ When you log in with Spring Security, it manages your authentication across mult
 In essence, Spring Security leverages sessions and cookies, mainly JSESSIONID, to ensure you remain authenticated across requests.
 
 CSRF (Cross-Site Request Forgery) is a type of attack on web applications. It happens when an attacker tricks a user into doing something they didn't intend to do on a different website where they are already logged in. Spring Boot Security uses CSRF protection to stop these tricks and keep your application safe.
+
+
+## Properties:
+In Spring we can set configuration of our app through three ways:
+  1. CLI
+  2. application.properties
+  3. application.yml
+The priority order of execution of these configs by spring is this 1 then 2 then 3.
